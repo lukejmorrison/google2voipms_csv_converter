@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google CSV to VoIP.ms Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+  <h1>Convert Google Contacts CSV to VoIP.ms Format</h1>
+  <input type="file" id="inputFile" accept=".csv">
+  <input type="checkbox" id="includeHeader" name="includeHeader">
+  <label for="includeHeader">Include header row in output CSV</label>
+  <button onclick="convertFile()">Convert</button>
+
+  <script>
+    function convertFile() {
+      const fileInput = document.getElementById('inputFile');
+      const includeHeader = document.getElementById('includeHeader').checked;
+      
+      if (fileInput.files.length === 0) {
+        alert('Please select a CSV file to convert.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const inputCsv = e.target.result;
+        const outputCsv = convertGoogleCsvToVoipMs(inputCsv, includeHeader);
+        
+        // Generate ISO date (YYYY-MM-DD)
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const isoDate = `${year}-${month}-${day}`;
+        const fileName = `${isoDate}_voipms_phonebook.csv`;
+        
+        downloadCsv(outputCsv, fileName);
+      };
+
+      reader.readAsText(file);
+    }
+
+    function convertGoogleCsvToVoipMs(inputCsv, includeHeader) {
+      const parsed = Papa.parse(inputCsv, { header: true });
+      const rows = parsed.data;
+
+      const header = '"Speed Dial","Name","Phone Number","Group Label","Caller ID Override","Note"';
+      const entries = [];
+
+      rows.forEach(row => {
+        const name = [row['First Name'], row['Middle Name'], row['Last Name']]
+          .filter(Boolean)
+          .join(' ') || row['Organization Name'] || 'Unknown';
+
+        const labels = (row['Labels'] || '').split(' ::: ').map(label => label.trim());
+        const isStarred = labels.some(label => label.toLowerCase() === 'starred' || label.toLowerCase() === '* starred');
+        const groupLabel = isStarred ? 'starred' : (labels.filter(l => !l.startsWith('*'))[0] || 'General');
+
+        for (let i = 1; i <= 5; i++) {
+          const phoneValue = row[`Phone ${i} - Value`];
+          if (phoneValue) {
+            const mainPhone = phoneValue.split(',')[0];
+            let phoneNumber = mainPhone.startsWith('+') ? '+' + mainPhone.slice(1).replace(/\D/g, '') : mainPhone.replace(/\D/g, '');
+            if (isValidPhoneNumber(phoneNumber)) {
+              const entryName = row[`Phone ${i} - Label`] ? `${name} - ${row[`Phone ${i} - Label`]}` : name;
+              entries.push([
+                '',
+                entryName,
+                phoneNumber,
+                groupLabel,
+                '',
+                ''
+              ]);
+            }
+          }
+        }
+      });
+
+      const outputCsv = (includeHeader ? [header] : []).concat(
+        entries.map(entry => {
+          const [speedDial, name, phoneNumber, groupLabel, callerIdOverride, note] = entry;
+          const escapedName = name.replace(/"/g, '""');
+          const escapedGroup = groupLabel.replace(/"/g, '""');
+          return `${speedDial},"${escapedName}",${phoneNumber},"${escapedGroup}",${callerIdOverride},${note}`;
+        })
+      ).join('\n');
+
+      return outputCsv;
+    }
+
+    function isValidPhoneNumber(phoneNumber) {
+      if (phoneNumber.startsWith('+')) {
+        return phoneNumber.length > 1 && /^\+\d+$/.test(phoneNumber);
+      } else {
+        return phoneNumber.length >= 10 && /^\d+$/.test(phoneNumber);
+      }
+    }
+
+    function downloadCsv(csvContent, fileName) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
