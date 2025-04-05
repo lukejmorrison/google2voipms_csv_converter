@@ -6,78 +6,118 @@ This script converts a Google Contacts CSV file exported from Google Contacts in
 
 Once converted, you can upload the properly formatted phonebook to your VoIP.ms account to manage incoming calls. To use this setup with VoIP.ms:
 - **Upload the Phonebook**: After conversion, upload the CSV to VoIP.ms via the phonebook import feature.
-- **Set Default DID Routing**: Configure the default routing for your DID (Direct Inward Dialing) number to "Hangup". This ensures that calls from unknown or unfiltered numbers are automatically disconnected.
-- **Create Caller ID Filters**: Use the group names assigned in the phonebook (e.g., "General", "ForwardToCell") to create caller ID filters in VoIP.ms. These filters override the default "Hangup" routing, directing calls to specific destinations like voicemail, a cell phone, or custom recordings based on the caller’s group.
+- **Set Default DID Routing**: Configure the default routing for your DID to "Hangup". This ensures calls from unknown numbers are disconnected.
+- **Create Caller ID Filters**: Use group names from the phonebook (e.g., "General", "ForwardToCell") to create caller ID filters in VoIP.ms, overriding the default "Hangup" routing to destinations like voicemail or a cell phone.
 
 ## Usage
 
 1. **Open the Script**: Launch `gmailcontacts2voipms_phonebook_csv.html` in a web browser.
 2. **Upload File**: Click the "Choose File" button and select your Google Contacts CSV file.
-3. **Header Option**: Check the "Include header row in output CSV" checkbox if you want headers in the output file.
+3. **Header Option**: Check the "Include header row in output CSV" checkbox if desired.
 4. **Convert**: Click the "Convert" button.
-5. **Download**: The converted file will automatically download as `YYYY-MM-DD_voipms_phonebook.csv` (e.g., `2025-04-04_voipms_phonebook.csv`).
+5. **Download**: The file downloads as `YYYY-MM-DD_voipms_phonebook.csv` (e.g., `2025-04-04_voipms_phonebook.csv`).
+
+## Deploying from Git Repository
+
+To deploy this tool directly from the GitHub repository (`https://github.com/lukejmorrison/google2voipms_csv_converter`):
+
+1. **Clone the Repository**:
+   - Open a terminal or command prompt.
+   - Run:
+     ```bash
+     git clone https://github.com/lukejmorrison/google2voipms_csv_converter.git
+     ```
+   - This downloads the project to a local folder named `google2voipms_csv_converter`.
+
+2. **Navigate to the Project**:
+   - Change directory:
+     ```bash
+     cd google2voipms_csv_converter
+     ```
+
+3. **Run the Tool**:
+   - Open `gmailcontacts2voipms_phonebook_csv.html` in a web browser (e.g., double-click the file or drag it into Chrome/Firefox).
+   - The tool uses PapaParse via CDN by default, so an internet connection is required unless you configure it for offline use (see below).
+
+4. **Optional: Offline Use**:
+   - Download `papaparse.min.js` from [PapaParse CDN](https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js).
+   - Save it in the project folder.
+   - Edit `gmailcontacts2voipms_phonebook_csv.html` to replace:
+     ```html
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+     ```
+     with:
+     ```html
+     <script src="papaparse.min.js"></script>
+     ```
+   - Now it runs offline.
+
+## Contributing to the Project
+
+If you’d like to contribute to this project by fixing bugs, adding features, or improving the code:
+
+1. **Fork the Repository**:
+   - Go to `https://github.com/lukejmorrison/google2voipms_csv_converter`.
+   - Click the "Fork" button to create a copy under your GitHub account.
+
+2. **Clone Your Fork**:
+   - Clone your forked repository:
+     ```bash
+     git clone https://github.com/YOUR_USERNAME/google2voipms_csv_converter.git
+     ```
+   - Replace `YOUR_USERNAME` with your GitHub username.
+
+3. **Create a Branch**:
+   - Navigate to the project folder:
+     ```bash
+     cd google2voipms_csv_converter
+     ```
+   - Create a new branch for your changes:
+     ```bash
+     git checkout -b feature-or-fix-name
+     ```
+     (e.g., `git checkout -b add-speed-dial-support`)
+
+4. **Make Changes**:
+   - Edit files (e.g., `gmailcontacts2voipms_phonebook_csv.html`) using your preferred editor (like VS Code).
+   - Test your changes by opening the updated HTML file in a browser.
+
+5. **Commit and Push**:
+   - Stage your changes:
+     ```bash
+     git add .
+     ```
+   - Commit with a descriptive message:
+     ```bash
+     git commit -m "Added speed dial assignment feature"
+     ```
+   - Push to your fork:
+     ```bash
+     git push origin feature-or-fix-name
+     ```
+
+6. **Submit a Pull Request**:
+   - Go to your forked repository on GitHub.
+   - Click "Pull requests" > "New pull request".
+   - Select your branch and submit it to `lukejmorrison/google2voipms_csv_converter`’s `main` branch.
+   - Describe your changes in the PR description.
+
+7. **Collaboration**:
+   - I’ll review your pull request, suggest changes if needed, and merge it once approved.
+
+**Tips**:
+- Ensure your changes align with the project’s purpose (converting Google Contacts to VoIP.ms phonebook CSV).
+- Test thoroughly with sample CSVs before submitting.
 
 ## Using with VoIP.ms Caller ID Filtering
 
-After uploading your converted phonebook to VoIP.ms, you can leverage the group labels to create caller ID filters for customized call routing. This section explains how to set it up.
+After uploading your phonebook to VoIP.ms:
+1. **Default Routing**: Set your DID to "System: Hangup" in DID settings.
+2. **Caller ID Filters**: In "Caller ID Filtering", create filters matching group labels (e.g., "General" to voicemail 4168384337, "ForwardToCell" to a cell phone).
 
-### Setup Overview
-
-1. **Default Routing**:
-   - In your VoIP.ms account, navigate to your DID settings.
-   - Set the default routing for your DID to "System: Hangup". This ensures all calls without a matching filter are terminated.
-
-2. **Caller ID Filters**:
-   - Go to the "Caller ID Filtering" section in VoIP.ms.
-   - Create filters that match the group labels from your phonebook (e.g., "General", "ToVMGroup").
-   - Assign a specific routing action to each filter (e.g., voicemail, forwarding, or playing a recording).
-
-### Example Filters
-
-Here are some example caller ID filters based on group labels from the phonebook:
-
-- **General Group**:
-  - **Filter**: Match group "General".
-  - **Routing**: Forward to voicemail at 4168384337.
-  - **Purpose**: Send calls from contacts labeled "General" to a specific voicemail.
-
-- **ToVMGroup**:
-  - **Filter**: Match group "ToVMGroup".
-  - **Routing**: Forward to voicemail at 7058080241.
-  - **Purpose**: Route calls from this group to a different voicemail.
-
-- **ForwardToCell**:
-  - **Filter**: Match group "ForwardToCell".
-  - **Routing**: Forward to your cell phone (e.g., forwarding entry 571417).
-  - **Purpose**: Direct calls from important contacts to your mobile.
-
-- **BuzzerGroup**:
-  - **Filter**: Match group "BuzzerGroup".
-  - **Routing**: Play a DTMF tone (e.g., IVR 95554 with DTMF 999).
-  - **Purpose**: Play a custom tone or recording for these callers.
-
-- **HangupGroup**:
-  - **Filter**: Match group "HangupGroup".
-  - **Routing**: System Hangup.
-  - **Purpose**: Immediately disconnect calls from this group.
-
-### How Group Labels Are Assigned
-
-The conversion script assigns group labels as follows:
-- **Starred Contacts**: If a contact is starred in Google Contacts, it gets the label "starred".
-- **Custom Labels**: The first non-default label (not starting with "*") is used as the group label (e.g., "ForwardToCell").
-- **Default Label**: If no custom labels are present, the group label defaults to "General".
-
-When creating filters in VoIP.ms, ensure the group names match exactly as they appear in the phonebook CSV.
-
-### Additional Notes
-
-- For detailed instructions on setting up caller ID filters, see the [VoIP.ms CallerID Filtering documentation](https://wiki.voip.ms/article/CallerID_Filtering).
-- Wildcards (e.g., `514*`) are supported for phone number matching, but for group-based filtering, use the exact group label.
+See the VoIP.ms documentation: [CallerID Filtering](https://wiki.voip.ms/article/CallerID_Filtering).
 
 ## Sample CSV Files
-
-Below are two sample CSV files with fictional sci-fi names and numbers, demonstrating the conversion process and group label usage.
 
 ### Sample Google Contacts CSV (`2025-04-04T19-31-00_sample_google_contacts.csv`)
 
@@ -115,18 +155,28 @@ Below are two sample CSV files with fictional sci-fi names and numbers, demonstr
 
 ## Running Locally with PapaParse
 
-To run the script offline:
-1. **Download PapaParse**: Get `papaparse.min.js` from [https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js](https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js).
-2. **Save Locally**: Place it next to `gmailcontacts2voipms_phonebook_csv.html`.
-3. **Update HTML**: Use `<script src="papaparse.min.js"></script>` in the HTML file.
-4. **Run**: Open `gmailcontacts2voipms_phonebook_csv.html` in a browser.
+To run offline:
+1. Download `papaparse.min.js` from [PapaParse CDN](https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js).
+2. Save it next to `gmailcontacts2voipms_phonebook_csv.html`.
+3. Update HTML: `<script src="papaparse.min.js"></script>`.
+4. Open `gmailcontacts2voipms_phonebook_csv.html` in a browser.
 
 ## Uploading to GitHub via VS Code
 
 To upload to `https://github.com/lukejmorrison/google2voipms_csv_converter`:
-1. Open the project in VS Code.
-2. Run: `git init`, `git add .`, `git commit -m "Updated with VoIP.ms filtering"`.
-3. Link repo: `git remote add origin https://github.com/lukejmorrison/google2voipms_csv_converter.git`.
-4. Push: `git push -u origin main`.
+1. Open project in VS Code.
+2. Run:
+   ```bash
+   git init
+   git add .
+   git commit -m "Updated with VoIP.ms filtering"
+   git remote add origin https://github.com/lukejmorrison/google2voipms_csv_converter.git
+   git push -u origin main
+   ```
+3. **Troubleshooting**: If you get `error: src refspec main does not match any`:
+   - Check branch: `git branch`
+   - If on `master`, push: `git push -u origin master`
+   - Or rename: `git branch -m master main`, then `git push -u origin main`
+   - Ensure commits exist: `git log`
 
 ```
